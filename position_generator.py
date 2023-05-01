@@ -5,20 +5,25 @@ except Exception as e: print(f"TransformerDecoder Might Not Work, as components 
 
 class PositionGenerator(tf.keras.Model):
 
-    def __init__(self, name_vocab_size, element_vocab_size, hidden_size, max_name_size, max_molecule_size, **kwargs):
+    def __init__(self, name_vocab_size, element_vocab_size, hidden_size, max_name_size, max_molecule_size):
 
-        super().__init__(**kwargs)
+        super().__init__()
         self.name_vocab_size  = name_vocab_size
         self.element_vocab_size = element_vocab_size
         self.hidden_size = hidden_size
         self.max_name_size = max_name_size
         self.max_molecule_size = max_molecule_size
 
-        self.name_encoding = PositionalEncoding(self.name_vocab_size, hidden_size, max_name_size)
+        self.name_encoding = PositionalEncoding(self.name_vocab_size, self.hidden_size, self.max_name_size)
         self.encoder_layer = TransformerEncoder(hidden_size)
-        self.element_encoding = tf.keras.layers.Embedding(self.element_vocab_size, self.hidden_size)
+
+        self.element_encoding = PositionalEncoding(self.element_vocab_size, self.hidden_size, self.max_molecule_size)
         self.decoder_layer = TransformerDecoder(hidden_size)
-        self.position_finder = tf.keras.layers.Dense(3)
+
+        self.position_finder = tf.keras.Sequential([
+            tf.keras.layers.Dense(128, activation='leaky_relu'),
+            tf.keras.layers.Dense(3)
+        ])
 
     def call(self, names, elements):
         encoded_names = self.name_encoding(names)
