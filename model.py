@@ -51,9 +51,10 @@ class OrgoNet(tf.keras.Model):
 
                 print(f"[Epoch: {epoch+1},   Batch: {index+1}/{num_batches}] --> Loss: {loss:.3f}", end='\r')
 
-            print(f"\n[Epoch: {epoch+1}] --> Total Loss: {total_loss:.3f}\n")
 
-            final_loss = total_loss
+            final_loss = total_loss / num_batches
+
+            print(f"\n[Epoch: {epoch+1}] --> Average Loss: {final_loss:.3f}\n")
     
         return final_loss
 
@@ -75,11 +76,11 @@ class OrgoNet(tf.keras.Model):
             
             total_loss += loss
 
-            print(f"[Batch: {index+1}/{num_batches}] --> Total Loss: {loss:.3f}", end='\r')
+            print(f"[Batch: {index+1}/{num_batches}] --> Loss: {loss:.3f}", end='\r')
 
         final_loss = total_loss / num_batches
 
-        print(f"\nAverage testing Loss: {final_loss:.3f}\n")
+        print(f"\nAverage Testing Loss: {final_loss:.3f}\n")
     
         return final_loss
 

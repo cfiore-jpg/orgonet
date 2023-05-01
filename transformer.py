@@ -54,7 +54,6 @@ class MultiHeadedAttention(tf.keras.layers.Layer):
     def __init__(self, emb_sz, use_mask, **kwargs):
         super(MultiHeadedAttention, self).__init__(**kwargs)
 
-        ## TODO: Add 3 heads as appropriate and any other necessary components
         self.h1 = AttentionHead(emb_sz, int(emb_sz/3), use_mask)
         self.h2 = AttentionHead(emb_sz, int(emb_sz/3), use_mask)
         self.h3 = AttentionHead(emb_sz, emb_sz - 2*int(emb_sz/3), use_mask)
@@ -70,6 +69,7 @@ class MultiHeadedAttention(tf.keras.layers.Layer):
         y = self.dense(y)
 
         return y
+    
     
 class TransformerEncoder(tf.keras.layers.Layer):
     def __init__(self, emb_sz, **kwargs):
