@@ -10,13 +10,13 @@ import pickle
 
 if __name__ == '__main__':
 
-    names_file = 'data/train/train_names.pkl'
-    elements_file = 'data/train/train_elements.pkl'
-    positions_file = 'data/train/train_positions_tensor.pkl'
+    # names_file = 'data/train/train_names.pkl'
+    # elements_file = 'data/train/train_elements.pkl'
+    # positions_file = 'data/train/train_positions_tensor.pkl'
 
-    # names_file = 'data/test/test_names.pkl'
-    # elements_file = 'data/test/test_elements.pkl'
-    # positions_file = 'data/test/test_positions_tensor.pkl'
+    names_file = 'data/test/test_names.pkl'
+    elements_file = 'data/test/test_elements.pkl'
+    positions_file = 'data/test/test_positions_tensor.pkl'
     
     names_vocab_file = 'data/names_vocabulary.pkl'
     elements_vocab_file = 'data/elements_vocabulary.pkl'
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     orgonet = OrgoNet(name_vocab_size, element_vocab_size, hidden_size, max_name_size, max_molecule_size)
     orgonet.compile(optimizer, loss, metrics)
 
-    # orgonet.load_weights(weights_path)
+    orgonet.load_weights(weights_path)
 
     ## Train Parameters
     pad_index = elements_vocab['<pad>'] 
@@ -62,11 +62,11 @@ if __name__ == '__main__':
     batch_size = 1024
 
     ## Train!
-    orgonet.train(names, elements, positions, pad_index, num_epochs, batch_size)
+    # orgonet.train(names, elements, positions, pad_index, num_epochs, batch_size)
 
     ## Test!
-    # orgonet.test(names, elements, positions, pad_index, 1024)
+    orgonet.test(names, elements, positions, pad_index, 1024)
 
     ## Save weights
-    orgonet.save_weights(weights_path)
+    # orgonet.save_weights(weights_path)
 
