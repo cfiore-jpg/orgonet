@@ -65,9 +65,9 @@ if __name__ == '__main__':
     # orgonet.train(names, elements, positions, pad_index, num_epochs, batch_size)
     # orgonet.save_weights(weights_path)
 
-    ## Test and load
+    ## Load and test
     orgonet.load_weights(weights_path)
-    # orgonet.test(names, elements, positions, pad_index, 1024)
+    orgonet.test(names, elements, positions, pad_index, 1024)
 
 
     orgonet.position_finder(tf.expand_dims(names[0], 0), tf.expand_dims(elements[0], 0))
