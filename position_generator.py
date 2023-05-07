@@ -20,10 +20,7 @@ class PositionGenerator(tf.keras.Model):
         self.element_encoding = PositionalEncoding(self.element_vocab_size, self.hidden_size, self.max_molecule_size)
         self.decoder_layer = TransformerDecoder(hidden_size)
 
-        self.position_finder = tf.keras.Sequential([
-            tf.keras.layers.Dense(128, activation='leaky_relu'),
-            tf.keras.layers.Dense(3)
-        ])
+        self.position_finder = tf.keras.layers.Dense(3)
 
     def call(self, names, elements):
         encoded_names = self.name_encoding(names)

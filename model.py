@@ -10,7 +10,7 @@ class OrgoNet(tf.keras.Model):
 
 
     def call(self, names, elements):
-        return self.position_finder(names, elements)  
+        return self.position_finder.call(names, elements)  
 
 
     def compile(self, optimizer, loss, metrics):

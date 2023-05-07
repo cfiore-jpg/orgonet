@@ -21,7 +21,7 @@ if __name__ == '__main__':
     names_vocab_file = 'data/names_vocabulary.pkl'
     elements_vocab_file = 'data/elements_vocabulary.pkl'
 
-    weights_path = 'data/saved_weights2/orgonet'
+    weights_path = 'data/saved_weights4/orgonet'
 
     with open(names_file, 'rb') as f:
         names = tf.convert_to_tensor(pickle.load(f), dtype=tf.float32)
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
 
     ## Model Parameters
-    hidden_size = 256
+    hidden_size = 128
     optimizer = tf.optimizers.Adam(0.001)
     loss = loss_function
     metrics = [accuracy_function]
@@ -61,12 +61,12 @@ if __name__ == '__main__':
     num_epochs = 20
     batch_size = 1024
 
-    ## Train!
+    ## Train and save
     # orgonet.train(names, elements, positions, pad_index, num_epochs, batch_size)
-
-    ## Test!
-    orgonet.test(names, elements, positions, pad_index, 1024)
-
-    ## Save weights
     # orgonet.save_weights(weights_path)
 
+    ## Test and load
+    orgonet.load_weights(weights_path)
+    orgonet.test(names, elements, positions, pad_index, 1024)
+
+    orgonet.summary()
