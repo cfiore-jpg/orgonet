@@ -10,7 +10,7 @@ class OrgoNet(tf.keras.Model):
 
 
     def call(self, names, elements):
-        return self.position_finder.call(names, elements)  
+        return self.position_finder(names, elements)  
 
 
     def compile(self, optimizer, loss, metrics):
@@ -41,7 +41,7 @@ class OrgoNet(tf.keras.Model):
 
                 mask = batch_elements != pad_index
                 with tf.GradientTape() as tape:
-                    pred_locations = self.call(batch_names, batch_elements)
+                    pred_locations = self(batch_names, batch_elements)
                     loss = self.loss_function(pred_locations, batch_locations, mask)
 
                 gradients = tape.gradient(loss, self.trainable_variables)
@@ -71,7 +71,7 @@ class OrgoNet(tf.keras.Model):
             batch_locations = test_locations[start:end, :, :]
 
             mask = batch_elements != pad_index
-            pred_locations = self.call(batch_names, batch_elements)
+            pred_locations = self(batch_names, batch_elements)
             loss = self.accuracy_function(pred_locations, batch_locations, mask)
             
             total_loss += loss
