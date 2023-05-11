@@ -9,19 +9,13 @@ import pickle
 
 
 if __name__ == '__main__':
-
-    names_file = 'data/train/train_names.pkl'
-    elements_file = 'data/train/train_elements.pkl'
-    positions_file = 'data/train/train_positions_tensor.pkl'
-
-    # names_file = 'data/test/test_names.pkl'
-    # elements_file = 'data/test/test_elements.pkl'
-    # positions_file = 'data/test/test_positions_tensor.pkl'
-    
+    names_file = 'data/test/test_names.pkl'
+    elements_file = 'data/test/test_elements.pkl'
+    positions_file = 'data/test/test_positions_tensor.pkl'
     names_vocab_file = 'data/names_vocabulary.pkl'
     elements_vocab_file = 'data/elements_vocabulary.pkl'
 
-    weights_path = 'data/saved_weights5/orgonet'
+    weights_path = 'data/saved_weights4/orgonet'
 
     with open(names_file, 'rb') as f:
         names = tf.convert_to_tensor(pickle.load(f), dtype=tf.float32)
@@ -44,7 +38,6 @@ if __name__ == '__main__':
     optimizer = tf.optimizers.Adam(0.001)
     loss = loss_function
     metrics = [accuracy_function]
-
     name_vocab_size = len(names_vocab)
     element_vocab_size = len(elements_vocab)
     max_name_size = names.shape[1]
@@ -54,19 +47,33 @@ if __name__ == '__main__':
     orgonet = OrgoNet(name_vocab_size, element_vocab_size, hidden_size, max_name_size, max_molecule_size)
     orgonet.compile(optimizer, loss, metrics)
 
-    ## Train Parameters
-    pad_index = elements_vocab['<pad>'] 
-    num_epochs = 20
-    batch_size = 1024
+    orgonet.load_weights(weights_path)
 
-    ## Train and save
-    orgonet.train(names, elements, positions, pad_index, num_epochs, batch_size)
-    orgonet.save_weights(weights_path)
+    name = ['4','-','oxo','-','butanoic','acid']
+    formula = ['C','C','H','O','H','H','C','H','H','C','O','O','H',]
 
-    ## Load and test
-    # orgonet.load_weights(weights_path)
-    # orgonet.test(names, elements, positions, pad_index, 1024)
+    mol_len = len(formula)
 
+    while len(name) < max_name_size:
+        name.append('<pad>')
 
-    # orgonet.position_finder(tf.expand_dims(names[0], 0), tf.expand_dims(elements[0], 0))
-    # orgonet.position_finder.summary()
+    while len(formula) < max_molecule_size:
+        formula.append('<pad>')
+
+    name_ = []
+    for n in name:
+        name_.append(names_vocab[n])
+    
+    formula_ = []
+    for f in formula:
+        formula_.append(elements_vocab[f])
+    
+    name = tf.convert_to_tensor(name_)
+    formula = tf.convert_to_tensor(formula_)
+
+    out_t = orgonet(tf.expand_dims(name, 0), tf.expand_dims(formula, 0))
+
+    out = out_t[0][:mol_len].numpy()
+
+    print(out)
+

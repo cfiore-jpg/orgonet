@@ -4,22 +4,12 @@ import tensorflow as tf
 
 class AttentionMatrix(tf.keras.layers.Layer):
 
-    def __init__(self, *args, use_mask=False, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.use_mask = use_mask
 
     def call(self, inputs):
         K, Q = inputs
-        window_size_queries = Q.get_shape()[1]  # window size of queries
-        window_size_keys    = K.get_shape()[1]  # window size of keys
-
-        mask_vals = np.triu(np.ones((window_size_queries, window_size_keys)) * np.NINF, k=1)
-        mask = tf.convert_to_tensor(value=mask_vals, dtype=tf.float32)
-        atten_mask = tf.tile(tf.reshape(mask, [-1, window_size_queries, window_size_keys]), [tf.shape(input=K)[0], 1, 1])
-
         x = tf.matmul(Q, tf.transpose(K, perm=[0,2,1]))
-        if self.use_mask == True:
-            x += atten_mask
         x = tf.nn.softmax(x / tf.sqrt(tf.cast(K.get_shape()[1], tf.float32)))
         return x
     
@@ -28,14 +18,13 @@ class AttentionMatrix(tf.keras.layers.Layer):
 
 
 class AttentionHead(tf.keras.layers.Layer):
-    def __init__(self, input_size, output_size, is_self_attention, **kwargs):
+    def __init__(self, input_size, output_size, **kwargs):
         super(AttentionHead, self).__init__(**kwargs)
-        self.use_mask = is_self_attention
 
         self.K = tf.Variable(tf.random.truncated_normal([input_size, output_size], stddev=.1))
         self.V = tf.Variable(tf.random.truncated_normal([input_size, output_size], stddev=.1))
         self.Q = tf.Variable(tf.random.truncated_normal([input_size, output_size], stddev=.1))
-        self.attn_mtx = AttentionMatrix(use_mask=self.use_mask)
+        self.attn_mtx = AttentionMatrix()
 
     def call(self, inputs_for_keys, inputs_for_values, inputs_for_queries):
 
@@ -51,12 +40,12 @@ class AttentionHead(tf.keras.layers.Layer):
 
 
 class MultiHeadedAttention(tf.keras.layers.Layer):
-    def __init__(self, emb_sz, use_mask, **kwargs):
+    def __init__(self, emb_sz, **kwargs):
         super(MultiHeadedAttention, self).__init__(**kwargs)
 
-        self.h1 = AttentionHead(emb_sz, int(emb_sz/3), use_mask)
-        self.h2 = AttentionHead(emb_sz, int(emb_sz/3), use_mask)
-        self.h3 = AttentionHead(emb_sz, emb_sz - 2*int(emb_sz/3), use_mask)
+        self.h1 = AttentionHead(emb_sz, int(emb_sz/3))
+        self.h2 = AttentionHead(emb_sz, int(emb_sz/3))
+        self.h3 = AttentionHead(emb_sz, emb_sz - 2*int(emb_sz/3))
         self.dense = tf.keras.layers.Dense(emb_sz)
 
     def call(self, inputs_for_keys, inputs_for_values, inputs_for_queries):
@@ -77,7 +66,7 @@ class TransformerEncoder(tf.keras.layers.Layer):
 
         self.ff_layer = tf.keras.Sequential([tf.keras.layers.Dense(2048, activation='leaky_relu'), 
                                              tf.keras.layers.Dense(emb_sz)])
-        self.self_atten         = MultiHeadedAttention(emb_sz, True)
+        self.self_atten         = MultiHeadedAttention(emb_sz)
         self.layer_norm = tf.keras.layers.LayerNormalization()
 
     def call(self, inputs):
@@ -96,8 +85,8 @@ class TransformerDecoder(tf.keras.layers.Layer):
 
         self.ff_layer = tf.keras.Sequential([tf.keras.layers.Dense(2048, activation='leaky_relu'), 
                                              tf.keras.layers.Dense(emb_sz)])
-        self.self_atten         = MultiHeadedAttention(emb_sz, True)
-        self.self_context_atten = MultiHeadedAttention(emb_sz, False)
+        self.self_atten         = MultiHeadedAttention(emb_sz)
+        self.self_context_atten = MultiHeadedAttention(emb_sz)
         self.layer_norm = tf.keras.layers.LayerNormalization()
 
     def call(self, inputs, context_sequence):
