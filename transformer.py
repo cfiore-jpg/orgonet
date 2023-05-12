@@ -12,9 +12,6 @@ class AttentionMatrix(tf.keras.layers.Layer):
         x = tf.matmul(Q, tf.transpose(K, perm=[0,2,1]))
         x = tf.nn.softmax(x / tf.sqrt(tf.cast(K.get_shape()[1], tf.float32)))
         return x
-    
-    def get_config(self):
-        return {"use_mask": self.use_mask}
 
 
 class AttentionHead(tf.keras.layers.Layer):
@@ -34,9 +31,6 @@ class AttentionHead(tf.keras.layers.Layer):
         x = self.attn_mtx((K, Q))
         x = tf.matmul(x, V)
         return x
-
-    def get_config(self):
-        return {"use_mask": self.use_mask}
 
 
 class MultiHeadedAttention(tf.keras.layers.Layer):
